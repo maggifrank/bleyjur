@@ -4,7 +4,7 @@ Build a small, mobile-first app for tracking an infant's diaper usage and the co
 
 ## Tech stack and hosting
 
-The app is **self-hosted on a local LXC container** on the home network, and **both parents share the same data** from their own phones.
+The app is **self-hosted on a local LXC container**, reachable only on the home network or over **Tailscale**, and **both parents share the same data** from their own phones.
 
 - **Server:** Node.js + TypeScript (Fastify or Express) with a small JSON REST API. One process serves both the API and the built frontend.
 - **Database:** **SQLite** file on the container (e.g. `better-sqlite3`), with simple versioned migrations. All data lives on the server, never only in a browser.
@@ -12,8 +12,8 @@ The app is **self-hosted on a local LXC container** on the home network, and **b
 - **Shared data:** every client reads from and writes to the server. When the app is opened or regains focus it refetches, and it polls every ~30 s while open, so one parent sees the other's entries without reloading.
 - **Offline tolerance:** if the server can't be reached (e.g. phone off Wi-Fi), new changes are queued locally and sent when the connection returns. Each record gets a client-generated UUID so retries never create duplicates.
 - **Who logged it:** each device picks a parent name once (stored on the device); every change and purchase records `logged_by`.
-- **Access:** LAN only, no user accounts. Optional shared PIN/passphrase set via an environment variable, checked by the server.
-- **Deployment:** runs as a **systemd service** in the LXC (Debian/Ubuntu). Config via environment variables: `PORT` (default 3000), `DATA_DIR` (SQLite location), `APP_PIN` (optional). Include a README with install steps and a one-command update (`git pull && npm ci && npm run build && systemctl restart bleyjur`).
+- **Access:** reachable only on the home network or via Tailscale (no public exposure, no user accounts). A **shared PIN is required**: set via an environment variable, entered once per device, checked by the server, which then issues a long-lived session cookie. Rate-limit wrong PIN attempts. Bind to `0.0.0.0` so both the LAN and Tailscale interfaces work.
+- **Deployment:** runs as a **systemd service** in the LXC (Debian/Ubuntu). Config via environment variables: `PORT` (default 3000), `DATA_DIR` (SQLite location), `APP_PIN` (required). Include a README with install steps and a one-command update (`git pull && npm ci && npm run build && systemctl restart bleyjur`).
 - **Backups:** a `GET /api/export` endpoint returning all data as JSON, an import endpoint, and a note in the README on copying the SQLite file (e.g. nightly cron with `sqlite3 .backup`).
 - **Tests:** unit tests (Vitest) for all cost and date-range calculations, run on the server where those calculations live.
 
@@ -28,7 +28,7 @@ Each time a diaper is used, the user logs a change. This must be fast: one tap f
 | id       | string                                | generated                                                    |
 | time     | datetime                              | defaults to now, editable                                    |
 | size     | string                                | e.g. `1`, `2`, `3`, `4`, `5`; defaults to the last used size |
-| type     | `wet` \| `dirty` \| `both` \| `dry`   | what the diaper contained                                    |
+| type     | `wet` \| `dirty` \| `both` \| `dry`   | what the diaper contained; `dry` still counts as a used diaper (it's only logged when a diaper was actually changed) |
 | note     | string, optional                      |                                                              |
 | logged_by | string                               | parent name from the device                                  |
 
@@ -49,7 +49,7 @@ Derived: **price per diaper = price / count**, shown on every purchase.
 
 ## Cost of a diaper change
 
-Every logged change gets a cost, taken from the packs of the **same size**, consumed in purchase order (FIFO):
+Every logged change gets a cost, taken from the packs of the **same size**, consumed in purchase order (FIFO). Example: a pack of 20 diapers for 1000 kr. makes those 20 diapers cost 50 kr. each; the next pack of 15 for 899 kr. makes its 15 diapers cost ~60 kr. each (899 / 15 = 59.93). Every change of every type, including `dry`, uses up one diaper.
 
 - Changes of a given size draw down the oldest pack of that size that still has diapers left, then the next, and so on.
 - The change's cost is that pack's price per diaper.
@@ -97,11 +97,4 @@ At the start of each new week (first time the app is opened on a device on or af
 
 ## Out of scope for v1
 
-User accounts, access from outside the home network, multiple children, notifications, and charts beyond simple numbers.
-
-## Open questions
-
-1. Is ISK the right default currency?
-2. Should "dry" be a change type, or only wet / dirty / both?
-3. Is FIFO per size the right way to price a change, or is a simple average price per size good enough?
-4. Do you want a PIN on the app, or is being on the home network enough?
+User accounts, public internet exposure, multiple children, notifications, and charts beyond simple numbers.
