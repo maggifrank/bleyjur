@@ -125,18 +125,18 @@ At the start of each new week (first time the app is opened on a device on or af
 
 ## App icon
 
-Use the ready-made icon in `icons/` (a smiling diaper on a mint background). `icons/icon.svg` is the source; the rest are rendered from it:
+Use the ready-made icon in `icons/` (a cheering baby in a diaper, with a krónur coin and a droplet, on a blue-violet background). `icons/icon.svg` is the source; the rest are rendered from it:
 
 | File                         | Use                                                        |
 | ---------------------------- | ---------------------------------------------------------- |
 | `icons/icon.svg`             | source, and `<link rel="icon" type="image/svg+xml">`        |
 | `icons/icon-192.png`         | web manifest icon, 192x192                                 |
-| `icons/icon-512.png`         | web manifest icon, 512x512, also `"purpose": "any maskable"` (artwork stays inside the maskable safe zone) |
+| `icons/icon-512.png`         | web manifest icon, 512x512, `"purpose": "any"` |
 | `icons/apple-touch-icon.png` | `<link rel="apple-touch-icon">`, 180x180 for iOS home screen |
 | `icons/favicon.ico`          | browser tab favicon (16, 32, 48)                           |
 | `icons/favicon-32.png`       | PNG favicon fallback                                       |
 
-Copy them into the frontend's public/static folder. Use `#4FB5B0` as the manifest `theme_color` and `background_color`.
+Copy them into the frontend's public/static folder. Use `#7A86F5` as the manifest `theme_color` and `background_color`.
 
 ## Requirements
 

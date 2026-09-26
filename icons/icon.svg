@@ -1,61 +1,104 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <title>Bleyjur</title>
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#8FDCCF"/>
-      <stop offset="1" stop-color="#4FB5B0"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9AD4FF"/>
+      <stop offset="1" stop-color="#7A86F5"/>
     </linearGradient>
-    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FFFFFF"/>
-      <stop offset="1" stop-color="#EAF3F7"/>
+    <radialGradient id="glow" cx="0.5" cy="0.45" r="0.5">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="coin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE27A"/>
+      <stop offset="1" stop-color="#FFB938"/>
     </linearGradient>
-    <clipPath id="diaper">
-      <path id="shape" d="M118 160 Q106 160 106 172 L106 250 Q106 262 118 264 Q180 276 196 360 Q198 372 212 372 L300 372 Q314 372 316 360 Q332 276 394 264 Q406 262 406 250 L406 172 Q406 160 394 160 Z"/>
+    <clipPath id="dp">
+      <path d="M188 296 Q176 296 176 308 L176 350 Q178 364 192 368 Q220 378 226 394 Q228 404 240 404 L272 404 Q284 404 286 394 Q292 378 320 368 Q334 364 336 350 L336 308 Q336 296 324 296 Z"/>
     </clipPath>
   </defs>
 
-  <!-- full-bleed background (platforms apply their own rounding/masks) -->
   <rect width="512" height="512" fill="url(#bg)"/>
+  <circle cx="256" cy="250" r="230" fill="url(#glow)"/>
 
-  <!-- sparkles -->
-  <g fill="#FFF6C9">
-    <path d="M396 92 L402 110 L420 116 L402 122 L396 140 L390 122 L372 116 L390 110 Z"/>
-    <path d="M122 380 L126 392 L138 396 L126 400 L122 412 L118 400 L106 396 L118 392 Z"/>
-    <circle cx="140" cy="118" r="6"/>
-    <circle cx="398" cy="370" r="5"/>
+  <!-- confetti -->
+  <g opacity="0.95">
+    <circle cx="96" cy="300" r="7" fill="#FF8FB1"/>
+    <circle cx="420" cy="300" r="6" fill="#FFE27A"/>
+    <rect x="404" y="196" width="14" height="14" rx="3" fill="#FF8FB1" transform="rotate(20 411 203)"/>
+    <rect x="84" y="200" width="12" height="12" rx="3" fill="#8EF0C9" transform="rotate(-15 90 206)"/>
+    <circle cx="150" cy="430" r="5" fill="#FFFFFF"/>
+    <circle cx="372" cy="436" r="6" fill="#8EF0C9"/>
+    <path d="M440 360 L445 374 L459 379 L445 384 L440 398 L435 384 L421 379 L435 374 Z" fill="#FFF6C9"/>
   </g>
 
-  <!-- soft shadow -->
-  <ellipse cx="256" cy="400" rx="112" ry="14" fill="#2E8A86" opacity="0.35"/>
+  <g stroke="#3A2E48" stroke-linecap="round" stroke-linejoin="round">
+    <!-- arms (waving up) -->
+    <path d="M206 276 Q170 256 150 212" fill="none" stroke-width="44"/>
+    <path d="M206 276 Q170 256 150 212" fill="none" stroke="#FFD7B8" stroke-width="30"/>
+    <path d="M306 276 Q342 256 362 212" fill="none" stroke-width="44"/>
+    <path d="M306 276 Q342 256 362 212" fill="none" stroke="#FFD7B8" stroke-width="30"/>
+    <circle cx="146" cy="200" r="22" fill="#FFD7B8" stroke-width="7"/>
+    <circle cx="366" cy="200" r="22" fill="#FFD7B8" stroke-width="7"/>
 
-  <!-- side tabs -->
-  <rect x="86" y="196" width="36" height="44" rx="12" fill="#FFD166"/>
-  <rect x="390" y="196" width="36" height="44" rx="12" fill="#FFD166"/>
+    <!-- legs -->
+    <path d="M214 390 Q204 420 190 436" fill="none" stroke-width="46"/>
+    <path d="M214 390 Q204 420 190 436" fill="none" stroke="#FFD7B8" stroke-width="32"/>
+    <path d="M298 390 Q308 420 322 436" fill="none" stroke-width="46"/>
+    <path d="M298 390 Q308 420 322 436" fill="none" stroke="#FFD7B8" stroke-width="32"/>
+    <ellipse cx="180" cy="446" rx="30" ry="18" fill="#FFD7B8" stroke-width="7"/>
+    <ellipse cx="332" cy="446" rx="30" ry="18" fill="#FFD7B8" stroke-width="7"/>
 
-  <!-- diaper body -->
-  <path d="M118 160 Q106 160 106 172 L106 250 Q106 262 118 264 Q180 276 196 360 Q198 372 212 372 L300 372 Q314 372 316 360 Q332 276 394 264 Q406 262 406 250 L406 172 Q406 160 394 160 Z"
-        fill="url(#body)" stroke="#2F4858" stroke-width="8" stroke-linejoin="round"/>
+    <!-- torso -->
+    <ellipse cx="256" cy="298" rx="68" ry="58" fill="#FFD7B8" stroke-width="7"/>
 
-  <!-- waistband -->
-  <g clip-path="url(#diaper)">
-    <rect x="100" y="156" width="312" height="38" fill="#A7D8F5"/>
-    <g fill="#FFFFFF" opacity="0.8">
-      <circle cx="156" cy="175" r="5"/><circle cx="196" cy="175" r="5"/>
-      <circle cx="236" cy="175" r="5"/><circle cx="276" cy="175" r="5"/>
-      <circle cx="316" cy="175" r="5"/><circle cx="356" cy="175" r="5"/>
+    <!-- diaper tabs -->
+    <rect x="164" y="310" width="26" height="30" rx="8" fill="#FFD166" stroke-width="6"/>
+    <rect x="322" y="310" width="26" height="30" rx="8" fill="#FFD166" stroke-width="6"/>
+  </g>
+
+  <!-- diaper -->
+  <path d="M188 296 Q176 296 176 308 L176 350 Q178 364 192 368 Q220 378 226 394 Q228 404 240 404 L272 404 Q284 404 286 394 Q292 378 320 368 Q334 364 336 350 L336 308 Q336 296 324 296 Z" fill="#FFFFFF"/>
+  <g clip-path="url(#dp)">
+    <rect x="170" y="292" width="172" height="24" fill="#A7D8F5"/>
+    <g fill="#FF8FB1">
+      <path d="M232 344 c0-6 8-8 10-2 c2-6 10-4 10 2 c0 6-10 12-10 12 s-10-6-10-12z"/>
+      <circle cx="206" cy="336" r="4" fill="#A7D8F5"/>
+      <circle cx="306" cy="336" r="4" fill="#A7D8F5"/>
+      <circle cx="274" cy="364" r="3.5" fill="#FFD166"/>
+      <circle cx="238" cy="374" r="3.5" fill="#FFD166"/>
+      <circle cx="286" cy="336" r="3.5" fill="#FFD166"/>
     </g>
   </g>
-  <path d="M106 194 L406 194" stroke="#2F4858" stroke-width="6" stroke-linecap="round" opacity="0.25"/>
-  <!-- redraw outline over waistband -->
-  <path d="M118 160 Q106 160 106 172 L106 250 Q106 262 118 264 Q180 276 196 360 Q198 372 212 372 L300 372 Q314 372 316 360 Q332 276 394 264 Q406 262 406 250 L406 172 Q406 160 394 160 Z"
-        fill="none" stroke="#2F4858" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M188 296 Q176 296 176 308 L176 350 Q178 364 192 368 Q220 378 226 394 Q228 404 240 404 L272 404 Q284 404 286 394 Q292 378 320 368 Q334 364 336 350 L336 308 Q336 296 324 296 Z" fill="none" stroke="#3A2E48" stroke-width="7" stroke-linejoin="round"/>
 
-  <!-- face -->
-  <ellipse cx="198" cy="286" rx="15" ry="10" fill="#FF9AA2" opacity="0.85"/>
-  <ellipse cx="314" cy="286" rx="15" ry="10" fill="#FF9AA2" opacity="0.85"/>
-  <circle cx="222" cy="252" r="11" fill="#2F4858"/>
-  <circle cx="290" cy="252" r="11" fill="#2F4858"/>
-  <circle cx="226" cy="248" r="3.5" fill="#FFFFFF"/>
-  <circle cx="294" cy="248" r="3.5" fill="#FFFFFF"/>
-  <path d="M232 284 Q256 310 280 284" fill="none" stroke="#2F4858" stroke-width="8" stroke-linecap="round"/>
+  <!-- head -->
+  <g stroke="#3A2E48" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="166" cy="184" r="20" fill="#FFD7B8"/>
+    <circle cx="346" cy="184" r="20" fill="#FFD7B8"/>
+    <circle cx="256" cy="178" r="92" fill="#FFD7B8"/>
+    <!-- hair curl -->
+    <path d="M250 88 Q244 60 266 58 Q286 60 280 78 Q274 90 262 82" fill="none" stroke-width="8"/>
+    <!-- happy eyes -->
+    <path d="M208 180 Q222 162 236 180" fill="none" stroke-width="8"/>
+    <path d="M276 180 Q290 162 304 180" fill="none" stroke-width="8"/>
+    <!-- open smile -->
+    <path d="M230 206 Q256 206 282 206 Q280 240 256 240 Q232 240 230 206 Z" fill="#E4586E" stroke-width="7"/>
+  </g>
+  <path d="M242 228 Q256 220 270 228 Q264 236 256 236 Q248 236 242 228 Z" fill="#FF9AAE"/>
+  <ellipse cx="200" cy="210" rx="16" ry="10" fill="#FF8FA3" opacity="0.7"/>
+  <ellipse cx="312" cy="210" rx="16" ry="10" fill="#FF8FA3" opacity="0.7"/>
+
+  <!-- floating coin -->
+  <g transform="translate(16 16) rotate(-14 104 112)">
+    <circle cx="104" cy="112" r="36" fill="url(#coin)" stroke="#3A2E48" stroke-width="7"/>
+    <circle cx="104" cy="112" r="25" fill="none" stroke="#E89A1C" stroke-width="4"/>
+    <text x="104" y="124" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="800" font-size="32" fill="#9A5B00">kr</text>
+  </g>
+
+  <!-- floating droplet -->
+  <g transform="translate(-12 14) rotate(12 410 108)">
+    <path d="M410 64 Q440 104 440 124 A30 30 0 0 1 380 124 Q380 104 410 64 Z" fill="#6FD3FF" stroke="#3A2E48" stroke-width="7" stroke-linejoin="round"/>
+    <ellipse cx="398" cy="122" rx="6" ry="10" fill="#FFFFFF" opacity="0.8"/>
+  </g>
 </svg>
