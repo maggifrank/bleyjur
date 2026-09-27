@@ -6,14 +6,20 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-# Root: writes to the checkout and calls systemctl.
+# Root: backs up the database and calls systemctl. The script runs git and npm
+# as BUILD_USER, and it is the installed copy, not the one in the checkout.
 User=root
+StateDirectory=bleyjur-update
+StateDirectoryMode=0700
 Environment=APP_DIR=/opt/bleyjur
 Environment=HEALTH_URL=http://127.0.0.1:3000/api/health
 Environment=APP_SERVICE=bleyjur.service
 Environment=DATA_DIR=/var/lib/bleyjur
 Environment=HOME=/root
-ExecStart=/opt/bleyjur/update.sh
+Environment=BUILD_USER=bleyjur-build
+Environment=BUILD_HOME=/var/lib/bleyjur-build
+Environment=STATE_DIR=/var/lib/bleyjur-update
+ExecStart=/usr/local/sbin/bleyjur-update
 # npm ci + build can be slow on a small container; don't let a hung run block forever.
 TimeoutStartSec=30min
 Nice=10

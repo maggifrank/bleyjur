@@ -60,5 +60,5 @@ server/   Fastify API, SQLite, cost and report calculations (+ tests)
 client/   Preact PWA (Vite)
 shared/   API types used by both
 deploy/   systemd units and install script
-update.sh auto-deploy script run by bleyjur-update.timer
+update.sh auto-deploy script; install.sh copies it to /usr/local/sbin/bleyjur-update
 ```

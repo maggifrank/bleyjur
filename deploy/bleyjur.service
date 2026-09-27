@@ -19,7 +19,7 @@ StateDirectory=bleyjur
 StateDirectoryMode=0750
 UMask=0027
 
-# Hardening. The checkout in /opt/bleyjur is owned by root and read-only here.
+# Hardening. The checkout in /opt/bleyjur is owned by bleyjur-build and read-only here.
 NoNewPrivileges=yes
 ProtectSystem=strict
 ReadWritePaths=/var/lib/bleyjur
