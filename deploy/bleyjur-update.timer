@@ -1,0 +1,11 @@
+[Unit]
+Description=Check GitHub for Bleyjur updates every 5 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+RandomizedDelaySec=30s
+Unit=bleyjur-update.service
+
+[Install]
+WantedBy=timers.target

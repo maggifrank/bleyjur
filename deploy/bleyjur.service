@@ -1,0 +1,38 @@
+[Unit]
+Description=Bleyjur diaper tracker
+Documentation=file:///opt/bleyjur/DEPLOY.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=bleyjur
+Group=bleyjur
+WorkingDirectory=/opt/bleyjur
+EnvironmentFile=/etc/bleyjur/bleyjur.env
+ExecStart=/usr/bin/node dist/server/index.js
+Restart=on-failure
+RestartSec=3
+
+# Creates /var/lib/bleyjur owned by the bleyjur user (DATA_DIR in the env file).
+StateDirectory=bleyjur
+StateDirectoryMode=0750
+UMask=0027
+
+# Hardening. The checkout in /opt/bleyjur is owned by root and read-only here.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/bleyjur
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+# Note: no MemoryDenyWriteExecute, the V8 JIT needs W+X memory.
+
+[Install]
+WantedBy=multi-user.target

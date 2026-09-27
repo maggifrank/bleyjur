@@ -25,3 +25,6 @@ coverage/
 .idea/
 .vscode/
 *.log
+
+# Local data (dev DATA_DIR)
+data/

@@ -1,0 +1,19 @@
+[Unit]
+Description=Bleyjur automatic update (git fetch, build, restart, health-check)
+Documentation=file:///opt/bleyjur/DEPLOY.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Root: writes to the checkout and calls systemctl.
+User=root
+Environment=APP_DIR=/opt/bleyjur
+Environment=HEALTH_URL=http://127.0.0.1:3000/api/health
+Environment=APP_SERVICE=bleyjur.service
+Environment=DATA_DIR=/var/lib/bleyjur
+Environment=HOME=/root
+ExecStart=/opt/bleyjur/update.sh
+# npm ci + build can be slow on a small container; don't let a hung run block forever.
+TimeoutStartSec=30min
+Nice=10
