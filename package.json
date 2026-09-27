@@ -8,13 +8,14 @@
   },
   "scripts": {
     "dev:server": "tsx watch server/index.ts",
-    "dev:client": "vite --config client/vite.config.ts",
+    "dev:client": "npm run icons && vite --config client/vite.config.ts",
     "build": "npm run build:server && npm run build:client",
     "build:server": "tsc -p tsconfig.server.json",
-    "build:client": "vite build --config client/vite.config.ts",
+    "build:client": "npm run icons && vite build --config client/vite.config.ts",
     "start": "node dist/server/index.js",
     "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc -p client/tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc -p client/tsconfig.json --noEmit",
+    "icons": "cp icons/* client/public/"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",

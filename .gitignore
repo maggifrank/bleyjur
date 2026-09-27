@@ -28,3 +28,8 @@ coverage/
 
 # Local data (dev DATA_DIR)
 data/
+
+# Copied from icons/ at build time (npm run icons)
+client/public/*.png
+client/public/*.ico
+client/public/icon.svg
