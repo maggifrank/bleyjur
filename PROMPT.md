@@ -28,13 +28,13 @@ Add `GET /api/health`: **no PIN required**, cheap, returns `200 {"ok":true}` whe
 ### Timer and service
 
 1. `deploy/bleyjur-update.timer` runs `bleyjur-update.service` 2 minutes after boot and then every 5 minutes: `OnBootSec=2min`, `OnUnitActiveSec=5min`, `RandomizedDelaySec=30s` so it doesn't hit GitHub exactly on the minute.
-2. `deploy/bleyjur-update.service` is `Type=oneshot` and runs as root, because it writes to the checkout and calls `systemctl`. `ExecStart=` is `update.sh` in the checkout. The repo path (`APP_DIR`) and health-check URL (`HEALTH_URL`, e.g. `http://127.0.0.1:3000/api/health`) come in through `Environment=` lines.
+2. `deploy/bleyjur-update.service` is `Type=oneshot` and runs as root, because it backs up the database and calls `systemctl`. Nothing from the repo runs as root: `git`, `npm ci` and `npm run build` run as the unprivileged `bleyjur-build` user (via `runuser`), which owns the checkout. `ExecStart=` is `/usr/local/sbin/bleyjur-update`, a root-owned copy of `update.sh` that `deploy/install.sh` installs, so a push can't change what runs as root. The repo path (`APP_DIR`) and health-check URL (`HEALTH_URL`, e.g. `http://127.0.0.1:3000/api/health`) come in through `Environment=` lines.
 
 ### `update.sh`
 
 - Runs with `set -euo pipefail` and `git fetch --quiet origin`.
 - Compares `git rev-parse HEAD` with `git rev-parse '@{u}'`. If they match, exits 0 **without printing anything**, so unchanged checks leave nothing in the journal.
-- Keeps a "last failed revision" marker in `.git/` (e.g. `.git/bleyjur-failed-rev`: untracked, persistent, root-writable). If the remote revision equals the marker, exits 0. A bad push is tried once, not every 5 minutes.
+- Keeps a "last failed revision" marker in `/var/lib/bleyjur-update/failed-rev` (root-only, outside the checkout, which root never reads from). If the remote revision equals the marker, exits 0. A bad push is tried once, not every 5 minutes.
 - If the working tree has local changes (`git status --porcelain` is non-empty, i.e. files were edited by hand on the server), prints an error and exits 1 without touching anything.
 - Updates with `git merge --ff-only`, **never** `git pull` or `reset --hard`. If the fast-forward fails, prints an error and exits 1.
 - Logs `updating OLD -> NEW`.

@@ -4,12 +4,13 @@ Bleyjur runs as a systemd service in a Debian/Ubuntu LXC container and updates i
 
 | What | Where |
 | --- | --- |
-| Checkout (owned by root) | `/opt/bleyjur` |
+| Checkout (owned by `bleyjur-build`) | `/opt/bleyjur` |
 | Config (chmod 600) | `/etc/bleyjur/bleyjur.env` |
 | SQLite database | `/var/lib/bleyjur/bleyjur.db` |
 | Pre-deploy DB copies | `/var/lib/bleyjur/backups/` (last 10) |
 | App unit | `bleyjur.service` (runs as user `bleyjur`) |
-| Updater | `bleyjur-update.timer` → `bleyjur-update.service` → `/opt/bleyjur/update.sh` |
+| Updater | `bleyjur-update.timer` → `bleyjur-update.service` → `/usr/local/sbin/bleyjur-update` (a copy of `update.sh`) |
+| Updater state (failed revision, lock) | `/var/lib/bleyjur-update/` |
 
 ## Fresh install
 
@@ -24,9 +25,19 @@ bash /opt/bleyjur/deploy/install.sh        # asks for the PIN
 # non-interactive: APP_PIN=1234 bash /opt/bleyjur/deploy/install.sh
 ```
 
-It installs git, curl, sqlite3, build-essential and python3 (for better-sqlite3's native build), Node.js 22 from NodeSource if needed, creates the `bleyjur` user and `/etc/bleyjur/bleyjur.env`, builds, and enables `bleyjur.service` and `bleyjur-update.timer`. You can run it again safely: it never overwrites the env file.
+It installs git, curl, sqlite3, build-essential and python3 (for better-sqlite3's native build), Node.js 22 from NodeSource if needed, creates the `bleyjur` and `bleyjur-build` users and `/etc/bleyjur/bleyjur.env`, hands the checkout to `bleyjur-build`, builds as that user, installs the updater to `/usr/local/sbin/bleyjur-update`, and enables `bleyjur.service` and `bleyjur-update.timer`. You can run it again safely: it never overwrites the env file.
+
+### Upgrading an install from before the build user
+
+Older installs ran the whole updater as root from the checkout. After that version pulls in this one, the updater logs `user bleyjur-build does not exist; re-run deploy/install.sh` every 5 minutes and changes nothing. Finish the switch once, as root:
+
+```sh
+bash /opt/bleyjur/deploy/install.sh
+```
 
 ### By hand
+
+The installer is the supported path; this is what it does.
 
 ```sh
 apt-get install -y git curl sqlite3 build-essential python3
@@ -34,14 +45,17 @@ apt-get install -y git curl sqlite3 build-essential python3
 curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs
 
 useradd --system --home-dir /var/lib/bleyjur --no-create-home --shell /usr/sbin/nologin bleyjur
+useradd --system --home-dir /var/lib/bleyjur-build --no-create-home --shell /usr/sbin/nologin bleyjur-build
+install -d -m 750 -o bleyjur-build -g bleyjur-build /var/lib/bleyjur-build
 git clone https://github.com/maggifrank/bleyjur.git /opt/bleyjur
+chown -R bleyjur-build:bleyjur-build /opt/bleyjur
 cd /opt/bleyjur
 
 mkdir -p /etc/bleyjur
 install -m 600 .env.example /etc/bleyjur/bleyjur.env
 nano /etc/bleyjur/bleyjur.env              # set APP_PIN
 
-npm ci && npm run build
+runuser -u bleyjur-build -- env HOME=/var/lib/bleyjur-build sh -c 'npm ci && npm run build'
 
 cp deploy/bleyjur.service /etc/systemd/system/
 systemctl daemon-reload
@@ -52,6 +66,7 @@ curl http://127.0.0.1:3000/api/health      # {"ok":true}
 Then turn on automatic deploys:
 
 ```sh
+install -m 755 update.sh /usr/local/sbin/bleyjur-update
 cp deploy/bleyjur-update.* /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable --now bleyjur-update.timer
@@ -63,15 +78,19 @@ The app listens on `0.0.0.0:3000`. Open it from the phones at `http://<tailscale
 
 ## Automatic deploys
 
-Two minutes after boot, and every 5 minutes after that, the timer runs `update.sh`:
+Two minutes after boot, and every 5 minutes after that, the timer runs `/usr/local/sbin/bleyjur-update`:
 
 1. `git fetch`. If nothing is new, it exits without printing anything.
-2. If the new revision already failed once (`.git/bleyjur-failed-rev`), it skips it.
+2. If the new revision already failed once (`/var/lib/bleyjur-update/failed-rev`), it skips it.
 3. If someone edited files in `/opt/bleyjur` by hand, it logs an error and does nothing.
 4. `git merge --ff-only`, `npm ci`, `npm run build`, then copies the database to `/var/lib/bleyjur/backups/pre-deploy-<time>-<oldrev>.db`.
 5. Restarts `bleyjur.service` and polls `/api/health` for up to 15 s.
 
-**Rollback:** if the build, the backup, the restart or the health check fails, it records the new revision in `.git/bleyjur-failed-rev`, runs `git reset --hard` back to the old revision, rebuilds, and (if the new code had already started) stops the app, restores the pre-deploy database copy, and starts the app again. The bad revision is not retried. Pushing a newer commit retries automatically.
+**Rollback:** if the build, the backup, the restart or the health check fails, it records the new revision in `/var/lib/bleyjur-update/failed-rev`, runs `git reset --hard` back to the old revision, rebuilds, and (if the new code had already started) stops the app, restores the pre-deploy database copy, and starts the app again. The bad revision is not retried. Pushing a newer commit retries automatically.
+
+### Who runs what
+
+The updater service runs as root, but nothing from the repo does. `git` and `npm ci`/`npm run build` (which run scripts from the repo and its dependencies) run as the unprivileged `bleyjur-build` user, which owns `/opt/bleyjur` and can't read the database or the env file. Root only backs up the database, restarts the app and checks its health. The script root runs is the installed copy in `/usr/local/sbin`, so a push can't change it either. A malicious push can therefore reach what the app itself can (its data and PIN), but not root on the container.
 
 Checking on it:
 
@@ -90,22 +109,22 @@ systemctl disable --now bleyjur-update.timer
 Clearing a failed revision so it's retried on the next run:
 
 ```sh
-rm /opt/bleyjur/.git/bleyjur-failed-rev
+rm /var/lib/bleyjur-update/failed-rev
 ```
 
 Running an update right now: `systemctl start bleyjur-update.service`.
 
-"Local changes" error: someone edited files in `/opt/bleyjur`. Look with `git -C /opt/bleyjur status`, then discard them (`git -C /opt/bleyjur checkout -- .`) or commit them upstream.
+"Local changes" error: someone edited files in `/opt/bleyjur`. Look with `runuser -u bleyjur-build -- git -C /opt/bleyjur status`, then discard them (`runuser -u bleyjur-build -- git -C /opt/bleyjur checkout -- .`) or commit them upstream.
 
-### Code deploys itself, unit files don't
+### Code deploys itself, the updater and unit files don't
 
-The updater only picks up code. After changing anything under `deploy/` (including `bleyjur.service`), copy the units again and reload by hand:
+The updater only picks up app code. After changing `update.sh` or anything under `deploy/`, re-run the installer (or copy by hand):
 
 ```sh
-cp /opt/bleyjur/deploy/bleyjur.service /opt/bleyjur/deploy/bleyjur-update.* /etc/systemd/system/
-systemctl daemon-reload
-systemctl restart bleyjur.service
+bash /opt/bleyjur/deploy/install.sh
 ```
+
+That's deliberate: those files run as root, so a change to them only takes effect when you apply it on the container.
 
 Changes to `.env.example` are not applied either; edit `/etc/bleyjur/bleyjur.env` and `systemctl restart bleyjur`. If you change `PORT`, also change `HEALTH_URL` in `bleyjur-update.service`.
 

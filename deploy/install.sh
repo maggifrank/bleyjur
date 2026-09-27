@@ -6,6 +6,8 @@ set -euo pipefail
 
 REPO_URL="${REPO_URL:-https://github.com/maggifrank/bleyjur.git}"
 APP_DIR="${APP_DIR:-/opt/bleyjur}"
+BUILD_USER=bleyjur-build
+BUILD_HOME=/var/lib/bleyjur-build
 ENV_DIR=/etc/bleyjur
 ENV_FILE="$ENV_DIR/bleyjur.env"
 NODE_MAJOR_MIN=22
@@ -32,19 +34,30 @@ fi
 [ -x /usr/bin/node ] || die "expected node at /usr/bin/node (bleyjur.service uses that path)"
 log "node $(node --version), npm $(npm --version)"
 
-# --- User -------------------------------------------------------------------
+# --- Users ------------------------------------------------------------------
+# bleyjur runs the app; bleyjur-build owns the checkout and runs git and npm.
 if ! id bleyjur >/dev/null 2>&1; then
     log "creating system user bleyjur"
     useradd --system --home-dir /var/lib/bleyjur --no-create-home --shell /usr/sbin/nologin bleyjur
 fi
+if ! id "$BUILD_USER" >/dev/null 2>&1; then
+    log "creating system user $BUILD_USER"
+    useradd --system --home-dir "$BUILD_HOME" --no-create-home --shell /usr/sbin/nologin "$BUILD_USER"
+fi
+install -d -m 750 -o "$BUILD_USER" -g "$BUILD_USER" "$BUILD_HOME"
+as_build() { runuser -u "$BUILD_USER" -- env HOME="$BUILD_HOME" "$@"; }
 
-# --- Checkout (owned by root, readable by bleyjur) --------------------------
+# --- Checkout (owned by bleyjur-build, readable by bleyjur) -----------------
 if [ ! -d "$APP_DIR/.git" ]; then
     log "cloning $REPO_URL to $APP_DIR"
     git clone "$REPO_URL" "$APP_DIR"
 else
     log "$APP_DIR already exists; leaving the checkout as is"
 fi
+# Older installs had a root-owned checkout and kept updater state in .git/.
+rm -f "$APP_DIR/.git/bleyjur-failed-rev" "$APP_DIR/.git/bleyjur-update.lock"
+chown -R "$BUILD_USER:$BUILD_USER" "$APP_DIR"
+chmod 755 "$APP_DIR"
 cd "$APP_DIR"
 
 # --- Env file -----------------------------------------------------------------
@@ -75,10 +88,14 @@ if grep -q '^APP_PIN=change-me$' "$ENV_FILE"; then
 fi
 
 # --- Build ------------------------------------------------------------------
-log "building (npm ci && npm run build)"
-npm ci --include=dev --no-audit --no-fund
-npm run build
-chmod +x update.sh
+log "building as $BUILD_USER (npm ci && npm run build)"
+as_build npm ci --include=dev --no-audit --no-fund
+as_build npm run build
+
+# The updater runs as root, so install a copy outside the checkout: pushes to
+# the repo can't change it. Re-run this installer to pick up a new version.
+log "installing updater to /usr/local/sbin/bleyjur-update"
+install -m 755 -o root -g root update.sh /usr/local/sbin/bleyjur-update
 
 # --- systemd ----------------------------------------------------------------
 log "installing systemd units"

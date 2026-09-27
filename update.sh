@@ -1,8 +1,18 @@
 #!/usr/bin/env bash
 # Bleyjur self-updater. Run by bleyjur-update.service (as root) every 5 minutes.
 # See DEPLOY.md. Prints nothing when there is nothing to do.
+#
+# deploy/install.sh copies this file to /usr/local/sbin/bleyjur-update; the
+# service runs that copy, never the one in the checkout, so a push can't change
+# what runs as root.
+#
+# Everything that comes from the repo (git, npm ci, npm run build) runs as the
+# unprivileged $BUILD_USER, who owns the checkout. Root only takes the database
+# backup, restarts the app and health-checks it. Root never runs git or reads
+# state from inside the checkout: a malicious build could have planted git
+# hooks, config or symlinks there. Locks and markers live in $STATE_DIR.
 # The whole script is one { ... } block so bash parses it completely before
-# running: git merge/reset below may replace this very file.
+# running, even if the installed copy is replaced mid-run.
 {
 set -euo pipefail
 
@@ -12,16 +22,36 @@ APP_SERVICE="${APP_SERVICE:-bleyjur.service}"
 DATA_DIR="${DATA_DIR:-/var/lib/bleyjur}"
 HEALTH_TIMEOUT="${HEALTH_TIMEOUT:-15}"   # seconds
 KEEP_BACKUPS="${KEEP_BACKUPS:-10}"
+BUILD_USER="${BUILD_USER:-bleyjur-build}"
+BUILD_HOME="${BUILD_HOME:-/var/lib/bleyjur-build}"
+STATE_DIR="${STATE_DIR:-/var/lib/bleyjur-update}"
 
-umask 022   # checkout is root-owned but must stay readable by the bleyjur user
+umask 022   # the build output must stay readable by the bleyjur user
 
 log() { echo "bleyjur-update: $*"; }
 err() { echo "bleyjur-update: ERROR: $*" >&2; }
 
+# Run a command from the repo as the build user, never as root.
+as_build() {
+    runuser -u "$BUILD_USER" -- env HOME="$BUILD_HOME" "$@"
+}
+
+is_rev() { [[ "$1" =~ ^[0-9a-f]{40}$ ]]; }
+
+if ! id "$BUILD_USER" >/dev/null 2>&1; then
+    err "user $BUILD_USER does not exist; re-run deploy/install.sh as root to finish setup."
+    exit 1
+fi
+if [ "$(stat -c '%U' "$APP_DIR")" != "$BUILD_USER" ]; then
+    err "$APP_DIR is not owned by $BUILD_USER; re-run deploy/install.sh as root to finish setup."
+    exit 1
+fi
+
 cd "$APP_DIR"
-GIT_DIR_ABS="$(git rev-parse --absolute-git-dir)"
-FAILED_MARKER="$GIT_DIR_ABS/bleyjur-failed-rev"
-LOCK_FILE="$GIT_DIR_ABS/bleyjur-update.lock"
+mkdir -p "$STATE_DIR"
+chmod 700 "$STATE_DIR"
+FAILED_MARKER="$STATE_DIR/failed-rev"
+LOCK_FILE="$STATE_DIR/update.lock"
 
 # Never let two runs overlap (e.g. a manual run while the timer fires).
 exec 9>"$LOCK_FILE"
@@ -29,10 +59,14 @@ if ! flock -n 9; then
     exit 0
 fi
 
-git fetch --quiet origin
+as_build git fetch --quiet origin
 
-OLD="$(git rev-parse HEAD)"
-NEW="$(git rev-parse '@{u}')"
+OLD="$(as_build git rev-parse HEAD)"
+NEW="$(as_build git rev-parse '@{u}')"
+if ! is_rev "$OLD" || ! is_rev "$NEW"; then
+    err "unexpected output from git rev-parse; nothing changed."
+    exit 1
+fi
 
 # Nothing new: exit silently so the journal stays clean.
 if [ "$OLD" = "$NEW" ]; then
@@ -44,12 +78,12 @@ if [ -f "$FAILED_MARKER" ] && [ "$(cat "$FAILED_MARKER")" = "$NEW" ]; then
     exit 0
 fi
 
-if [ -n "$(git status --porcelain)" ]; then
+if [ -n "$(as_build git status --porcelain)" ]; then
     err "working tree in $APP_DIR has local changes; refusing to update. See 'git status'."
     exit 1
 fi
 
-if ! git merge --ff-only --quiet '@{u}'; then
+if ! as_build git merge --ff-only --quiet '@{u}'; then
     err "fast-forward from ${OLD:0:7} to ${NEW:0:7} failed (diverged history?); nothing changed."
     exit 1
 fi
@@ -84,7 +118,7 @@ health_check() {
 
 build() {
     # --include=dev: the build needs TypeScript/Vite even if NODE_ENV=production leaks in.
-    npm ci --include=dev --no-audit --no-fund && npm run build
+    as_build npm ci --include=dev --no-audit --no-fund && as_build npm run build
 }
 
 restore_db() {
@@ -109,7 +143,7 @@ rollback() {
     err "deploy of ${NEW:0:7} failed; rolling back to ${OLD:0:7}"
     echo "$NEW" >"$FAILED_MARKER"
 
-    git reset --hard --quiet "$OLD" || err "git reset --hard $OLD failed"
+    as_build git reset --hard --quiet "$OLD" || err "git reset --hard $OLD failed"
     if ! build; then
         err "rebuilding ${OLD:0:7} failed too; the app may be broken. Manual attention needed."
     fi
