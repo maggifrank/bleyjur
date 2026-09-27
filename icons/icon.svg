@@ -13,8 +13,15 @@
       <stop offset="0" stop-color="#FFE27A"/>
       <stop offset="1" stop-color="#FFB938"/>
     </linearGradient>
+    <linearGradient id="shell" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E0A04E"/>
+      <stop offset="1" stop-color="#B8742E"/>
+    </linearGradient>
     <clipPath id="dp">
       <path d="M188 296 Q176 296 176 308 L176 350 Q178 364 192 368 Q220 378 226 394 Q228 404 240 404 L272 404 Q284 404 286 394 Q292 378 320 368 Q334 364 336 350 L336 308 Q336 296 324 296 Z"/>
+    </clipPath>
+    <clipPath id="shellclip">
+      <ellipse cx="256" cy="310" rx="118" ry="104"/>
     </clipPath>
   </defs>
 
@@ -24,33 +31,47 @@
   <!-- confetti -->
   <g opacity="0.95">
     <circle cx="96" cy="300" r="7" fill="#FF8FB1"/>
-    <circle cx="420" cy="300" r="6" fill="#FFE27A"/>
-    <rect x="404" y="196" width="14" height="14" rx="3" fill="#FF8FB1" transform="rotate(20 411 203)"/>
-    <rect x="84" y="200" width="12" height="12" rx="3" fill="#8EF0C9" transform="rotate(-15 90 206)"/>
-    <circle cx="150" cy="430" r="5" fill="#FFFFFF"/>
-    <circle cx="372" cy="436" r="6" fill="#8EF0C9"/>
+    <circle cx="428" cy="300" r="6" fill="#FFE27A"/>
+    <rect x="410" y="214" width="14" height="14" rx="3" fill="#FF8FB1" transform="rotate(20 417 221)"/>
+    <rect x="78" y="220" width="12" height="12" rx="3" fill="#8EF0C9" transform="rotate(-15 84 226)"/>
+    <circle cx="140" cy="440" r="5" fill="#FFFFFF"/>
+    <circle cx="376" cy="446" r="6" fill="#8EF0C9"/>
     <path d="M440 360 L445 374 L459 379 L445 384 L440 398 L435 384 L421 379 L435 374 Z" fill="#FFF6C9"/>
   </g>
+
+  <!-- shell (behind the body) -->
+  <ellipse cx="256" cy="310" rx="118" ry="104" fill="url(#shell)" stroke="#3A2E48" stroke-width="7"/>
+  <g clip-path="url(#shellclip)" fill="none" stroke="#8A5220" stroke-width="5" stroke-linejoin="round" opacity="0.7">
+    <path d="M150 250 L176 236 L176 270 L150 284 Z"/>
+    <path d="M362 250 L336 236 L336 270 L362 284 Z"/>
+    <path d="M140 320 L166 306 L170 346 L146 362"/>
+    <path d="M372 320 L346 306 L342 346 L366 362"/>
+    <path d="M168 398 L190 380 L216 404"/>
+    <path d="M344 398 L322 380 L296 404"/>
+  </g>
+  <ellipse cx="256" cy="310" rx="118" ry="104" fill="none" stroke="#F6C27A" stroke-width="6" opacity="0.5" transform="translate(0 -2) scale(1)" clip-path="url(#shellclip)"/>
 
   <g stroke="#3A2E48" stroke-linecap="round" stroke-linejoin="round">
     <!-- arms (waving up) -->
     <path d="M206 276 Q170 256 150 212" fill="none" stroke-width="44"/>
-    <path d="M206 276 Q170 256 150 212" fill="none" stroke="#FFD7B8" stroke-width="30"/>
+    <path d="M206 276 Q170 256 150 212" fill="none" stroke="#8FD97A" stroke-width="30"/>
     <path d="M306 276 Q342 256 362 212" fill="none" stroke-width="44"/>
-    <path d="M306 276 Q342 256 362 212" fill="none" stroke="#FFD7B8" stroke-width="30"/>
-    <circle cx="146" cy="200" r="22" fill="#FFD7B8" stroke-width="7"/>
-    <circle cx="366" cy="200" r="22" fill="#FFD7B8" stroke-width="7"/>
+    <path d="M306 276 Q342 256 362 212" fill="none" stroke="#8FD97A" stroke-width="30"/>
+    <circle cx="146" cy="200" r="22" fill="#8FD97A" stroke-width="7"/>
+    <circle cx="366" cy="200" r="22" fill="#8FD97A" stroke-width="7"/>
 
     <!-- legs -->
     <path d="M214 390 Q204 420 190 436" fill="none" stroke-width="46"/>
-    <path d="M214 390 Q204 420 190 436" fill="none" stroke="#FFD7B8" stroke-width="32"/>
+    <path d="M214 390 Q204 420 190 436" fill="none" stroke="#8FD97A" stroke-width="32"/>
     <path d="M298 390 Q308 420 322 436" fill="none" stroke-width="46"/>
-    <path d="M298 390 Q308 420 322 436" fill="none" stroke="#FFD7B8" stroke-width="32"/>
-    <ellipse cx="180" cy="446" rx="30" ry="18" fill="#FFD7B8" stroke-width="7"/>
-    <ellipse cx="332" cy="446" rx="30" ry="18" fill="#FFD7B8" stroke-width="7"/>
+    <path d="M298 390 Q308 420 322 436" fill="none" stroke="#8FD97A" stroke-width="32"/>
+    <ellipse cx="180" cy="446" rx="30" ry="18" fill="#8FD97A" stroke-width="7"/>
+    <ellipse cx="332" cy="446" rx="30" ry="18" fill="#8FD97A" stroke-width="7"/>
 
-    <!-- torso -->
-    <ellipse cx="256" cy="298" rx="68" ry="58" fill="#FFD7B8" stroke-width="7"/>
+    <!-- belly plate -->
+    <ellipse cx="256" cy="298" rx="68" ry="58" fill="#F7E6A6" stroke-width="7"/>
+    <path d="M204 278 L308 278" fill="none" stroke="#D9B964" stroke-width="5"/>
+    <path d="M256 244 L256 278" fill="none" stroke="#D9B964" stroke-width="5"/>
 
     <!-- diaper tabs -->
     <rect x="164" y="310" width="26" height="30" rx="8" fill="#FFD166" stroke-width="6"/>
@@ -61,33 +82,37 @@
   <path d="M188 296 Q176 296 176 308 L176 350 Q178 364 192 368 Q220 378 226 394 Q228 404 240 404 L272 404 Q284 404 286 394 Q292 378 320 368 Q334 364 336 350 L336 308 Q336 296 324 296 Z" fill="#FFFFFF"/>
   <g clip-path="url(#dp)">
     <rect x="170" y="292" width="172" height="24" fill="#A7D8F5"/>
-    <g fill="#FF8FB1">
-      <path d="M232 344 c0-6 8-8 10-2 c2-6 10-4 10 2 c0 6-10 12-10 12 s-10-6-10-12z"/>
-      <circle cx="206" cy="336" r="4" fill="#A7D8F5"/>
-      <circle cx="306" cy="336" r="4" fill="#A7D8F5"/>
-      <circle cx="274" cy="364" r="3.5" fill="#FFD166"/>
-      <circle cx="238" cy="374" r="3.5" fill="#FFD166"/>
-      <circle cx="286" cy="336" r="3.5" fill="#FFD166"/>
-    </g>
+    <path d="M232 344 c0-6 8-8 10-2 c2-6 10-4 10 2 c0 6-10 12-10 12 s-10-6-10-12z" fill="#FF8FB1"/>
+    <circle cx="206" cy="336" r="4" fill="#A7D8F5"/>
+    <circle cx="306" cy="336" r="4" fill="#A7D8F5"/>
+    <circle cx="274" cy="364" r="3.5" fill="#FFD166"/>
+    <circle cx="238" cy="374" r="3.5" fill="#FFD166"/>
+    <circle cx="286" cy="336" r="3.5" fill="#FFD166"/>
   </g>
   <path d="M188 296 Q176 296 176 308 L176 350 Q178 364 192 368 Q220 378 226 394 Q228 404 240 404 L272 404 Q284 404 286 394 Q292 378 320 368 Q334 364 336 350 L336 308 Q336 296 324 296 Z" fill="none" stroke="#3A2E48" stroke-width="7" stroke-linejoin="round"/>
 
-  <!-- head -->
+  <!-- turtle head -->
   <g stroke="#3A2E48" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="166" cy="184" r="20" fill="#FFD7B8"/>
-    <circle cx="346" cy="184" r="20" fill="#FFD7B8"/>
-    <circle cx="256" cy="178" r="92" fill="#FFD7B8"/>
-    <!-- hair curl -->
-    <path d="M250 88 Q244 60 266 58 Q286 60 280 78 Q274 90 262 82" fill="none" stroke-width="8"/>
-    <!-- happy eyes -->
-    <path d="M208 180 Q222 162 236 180" fill="none" stroke-width="8"/>
-    <path d="M276 180 Q290 162 304 180" fill="none" stroke-width="8"/>
-    <!-- open smile -->
-    <path d="M230 206 Q256 206 282 206 Q280 240 256 240 Q232 240 230 206 Z" fill="#E4586E" stroke-width="7"/>
+    <ellipse cx="256" cy="176" rx="96" ry="84" fill="#8FD97A"/>
+    <!-- head spots -->
+    <circle cx="206" cy="124" r="9" fill="#74C463" stroke="none"/>
+    <circle cx="302" cy="118" r="12" fill="#74C463" stroke="none"/>
+    <circle cx="324" cy="146" r="6" fill="#74C463" stroke="none"/>
+    <!-- big happy eyes -->
+    <circle cx="218" cy="170" r="17" fill="#3A2E48" stroke="none"/>
+    <circle cx="294" cy="170" r="17" fill="#3A2E48" stroke="none"/>
+    <circle cx="224" cy="163" r="6" fill="#FFFFFF" stroke="none"/>
+    <circle cx="300" cy="163" r="6" fill="#FFFFFF" stroke="none"/>
+    <circle cx="212" cy="176" r="3" fill="#FFFFFF" stroke="none"/>
+    <circle cx="288" cy="176" r="3" fill="#FFFFFF" stroke="none"/>
+    <!-- wide turtle smile -->
+    <path d="M222 206 Q256 216 290 206 Q286 236 256 236 Q226 236 222 206 Z" fill="#E4586E" stroke-width="7"/>
   </g>
-  <path d="M242 228 Q256 220 270 228 Q264 236 256 236 Q248 236 242 228 Z" fill="#FF9AAE"/>
-  <ellipse cx="200" cy="210" rx="16" ry="10" fill="#FF8FA3" opacity="0.7"/>
-  <ellipse cx="312" cy="210" rx="16" ry="10" fill="#FF8FA3" opacity="0.7"/>
+  <path d="M242 228 Q256 220 270 228 Q264 234 256 234 Q248 234 242 228 Z" fill="#FF9AAE"/>
+  <circle cx="248" cy="196" r="3" fill="#3A2E48"/>
+  <circle cx="264" cy="196" r="3" fill="#3A2E48"/>
+  <ellipse cx="192" cy="204" rx="16" ry="10" fill="#FF8FA3" opacity="0.7"/>
+  <ellipse cx="320" cy="204" rx="16" ry="10" fill="#FF8FA3" opacity="0.7"/>
 
   <!-- floating coin -->
   <g transform="translate(16 16) rotate(-14 104 112)">

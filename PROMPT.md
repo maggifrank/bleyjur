@@ -125,7 +125,7 @@ At the start of each new week (first time the app is opened on a device on or af
 
 ## App icon
 
-Use the ready-made icon in `icons/` (a cheering baby in a diaper, with a krónur coin and a droplet, on a blue-violet background). `icons/icon.svg` is the source; the rest are rendered from it:
+Use the ready-made icon in `icons/` (a cheering baby turtle in a diaper, with a krónur coin and a droplet, on a blue-violet background). `icons/icon.svg` is the source; the rest are rendered from it:
 
 | File                         | Use                                                        |
 | ---------------------------- | ---------------------------------------------------------- |
