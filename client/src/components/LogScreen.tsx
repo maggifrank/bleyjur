@@ -15,8 +15,6 @@ import { fmtMoney, fmtTime, fromDateTimeLocal, localDate, toDateTimeLocal, uuid 
 import { Choice, Field, Modal } from './ui';
 import { WeeklyCard, shouldShowWeekly } from './Weekly';
 
-const TYPE_ICON: Record<ChangeType, string> = { wet: '💧', dirty: '💩', both: '💧💩', dry: '○' };
-
 export function LogScreen(props: { view: AppState }) {
   const { lastSize, parentName, reports } = useStore();
   const s = t();
@@ -61,10 +59,7 @@ export function LogScreen(props: { view: AppState }) {
         <div class="log-grid">
           {CHANGE_TYPES.map((type) => (
             <button type="button" key={type} class={`log-btn t-${type}`} onClick={() => log(type)}>
-              <span class="log-icon" aria-hidden="true">
-                {TYPE_ICON[type]}
-              </span>
-              <span>{s.types[type]}</span>
+              <span class="log-icon">{s.types[type]}</span>
             </button>
           ))}
         </div>
@@ -101,7 +96,7 @@ function ChangeList(props: { changes: Change[]; view: AppState; onEdit: (c: Chan
               <span class="time">{fmtTime(c.time)}</span>
               <span class="size-badge">{c.size}</span>
               <span class="grow">
-                <span class={`type-dot t-${c.type}`} /> {s.types[c.type]}
+                {s.types[c.type]}
                 {c.note && <span class="note"> · {c.note}</span>}
                 <span class="sub">{c.loggedBy}</span>
               </span>

@@ -3,6 +3,9 @@ import type { ChangeType, PeriodKey } from '../../shared/types';
 
 export type Lang = 'is' | 'en';
 
+// Change types are shown as emojis only, in both languages.
+const TYPE_ICONS: Record<ChangeType, string> = { wet: '💧', dirty: '💩', both: '💧💩', dry: '○' };
+
 const is = {
   appName: 'Bleyjur',
   // tabs
@@ -26,7 +29,7 @@ const is = {
   // log
   logTitle: 'Skrá bleyjuskipti',
   size: 'Stærð',
-  types: { wet: 'Blaut', dirty: 'Kúkur', both: 'Bæði', dry: 'Þurr' } as Record<ChangeType, string>,
+  types: TYPE_ICONS,
   logged: (type: string, size: string) => `Skráð: ${type}, stærð ${size}`,
   undo: 'Afturkalla',
   undone: 'Afturkallað',
@@ -143,7 +146,7 @@ const en: Strings = {
   continue: 'Continue',
   logTitle: 'Log a change',
   size: 'Size',
-  types: { wet: 'Wet', dirty: 'Dirty', both: 'Both', dry: 'Dry' },
+  types: TYPE_ICONS,
   logged: (type, size) => `Logged: ${type}, size ${size}`,
   undo: 'Undo',
   undone: 'Undone',

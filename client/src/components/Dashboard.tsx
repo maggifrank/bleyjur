@@ -98,7 +98,7 @@ function PeriodCard(props: { report: PeriodReport; settings: Settings }) {
               <span class="tag-label">{s.byType}:</span>
               {types.map((ty) => (
                 <span class="tag" key={ty}>
-                  <span class={`type-dot t-${ty}`} /> {s.types[ty]} {r.byType[ty]}
+                  {s.types[ty]} {r.byType[ty]}
                 </span>
               ))}
             </div>
