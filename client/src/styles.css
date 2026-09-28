@@ -722,3 +722,63 @@ select.text-input {
   gap: 18px;
   font-size: 1.05rem;
 }
+
+/* ---------- interaction feedback (fx.ts) ---------- */
+
+.fx-host {
+  position: relative;
+  overflow: hidden;
+}
+.fx-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.18;
+  transform: scale(0);
+  pointer-events: none;
+  animation: fx-ripple 0.45s ease-out forwards;
+}
+@keyframes fx-ripple {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+.fx-pop {
+  position: fixed;
+  z-index: 70;
+  font-size: 1.6rem;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  translate: -50% -50%;
+  animation: fx-pop 0.8s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+@keyframes fx-pop {
+  0% {
+    transform: translate(0, 0) scale(0.4);
+    opacity: 0;
+  }
+  20% {
+    transform: translate(calc(var(--dx) * 0.3), -18px) scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), -80px) scale(0.9);
+    opacity: 0;
+  }
+}
+.fx-confetti {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 80;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-ripple,
+  .fx-pop {
+    display: none;
+  }
+}

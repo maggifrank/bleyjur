@@ -1,9 +1,12 @@
 import { render } from 'preact';
 import { App } from './app';
+import { installTapFeedback } from './fx';
 import { loadLang } from './i18n';
 import './styles.css';
 
 document.documentElement.lang = loadLang();
+
+installTapFeedback();
 
 render(<App />, document.getElementById('app')!);
 

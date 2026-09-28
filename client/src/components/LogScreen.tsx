@@ -11,9 +11,13 @@ import {
   unqueuePut,
   useStore,
 } from '../store';
+import { confetti, haptic, isMilestone, popEmoji } from '../fx';
 import { fmtMoney, fmtTime, fromDateTimeLocal, localDate, toDateTimeLocal, uuid } from '../util';
 import { Choice, Field, Modal } from './ui';
 import { WeeklyCard, shouldShowWeekly } from './Weekly';
+
+/** Emoji that floats up from a log button when tapped. */
+const POP: Record<ChangeType, string> = { wet: '💧', dirty: '💩', both: '💩', dry: '✨' };
 
 export function LogScreen(props: { view: AppState }) {
   const { lastSize, parentName, reports } = useStore();
@@ -24,7 +28,7 @@ export function LogScreen(props: { view: AppState }) {
   const sizes = settings.sizes.length ? settings.sizes : ['1'];
   const size = sizes.includes(lastSize) ? lastSize : (changes[0]?.size && sizes.includes(changes[0].size) ? changes[0].size : sizes[0]);
 
-  const log = (type: ChangeType) => {
+  const log = (type: ChangeType, e: MouseEvent) => {
     const change: Change = {
       id: uuid(),
       time: new Date().toISOString(),
@@ -35,8 +39,14 @@ export function LogScreen(props: { view: AppState }) {
     };
     setLastSize(size);
     enqueue({ kind: 'putChange', change });
-    navigator.vibrate?.(20);
-    showToast(s.logged(s.types[type], size), {
+    const total = changes.length + 1;
+    const milestone = isMilestone(total);
+    const emoji = POP[type];
+    for (let i = 0; i < 2; i++) setTimeout(() => popEmoji(e.clientX, e.clientY, emoji), 90 * (i + 1));
+    if (milestone) confetti();
+    else haptic(20);
+    const text = s.logged(s.types[type], size);
+    showToast(milestone ? `${s.milestone(total)} ${text}` : text, {
       label: s.undo,
       run: () => {
         if (!unqueuePut(change.id)) enqueue({ kind: 'deleteChange', id: change.id });
@@ -58,7 +68,7 @@ export function LogScreen(props: { view: AppState }) {
         <Choice options={sizes} value={size} onChange={setLastSize} big />
         <div class="log-grid">
           {CHANGE_TYPES.map((type) => (
-            <button type="button" key={type} class={`log-btn t-${type}`} onClick={() => log(type)}>
+            <button type="button" key={type} class={`log-btn t-${type}`} data-pop={POP[type]} onClick={(e) => log(type, e)}>
               <span class="log-icon">{s.types[type]}</span>
             </button>
           ))}
