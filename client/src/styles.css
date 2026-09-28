@@ -12,8 +12,8 @@
   --danger: #c8453b;
   --warn: #b7791f;
   --warn-soft: #fdf3e1;
-  --wet: #4a90d9;
-  --dirty: #9a6b3f;
+  --wet: #e0b000;
+  --dirty: #7a4a1f;
   --both: #7b61c4;
   --dry: #9aa5a5;
   --radius: 16px;
@@ -36,8 +36,8 @@
     --danger: #ef6b61;
     --warn: #f0b44c;
     --warn-soft: #3a2e17;
-    --wet: #6aa9ec;
-    --dirty: #c49469;
+    --wet: #f2cc3d;
+    --dirty: #a8713f;
     --both: #a08be0;
     --dry: #7d8a8a;
   }
